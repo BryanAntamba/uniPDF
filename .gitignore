@@ -1,0 +1,9 @@
+backend/node_modules/
+my-app/node_modules/
+
+.env
+.expo/
+dist/
+build/
+uploads/
+temp/
