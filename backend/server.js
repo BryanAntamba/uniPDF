@@ -34,6 +34,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+const uploadMultiple = multer({ storage }).array('archivos', 50);
 
 
 // ===============================
@@ -260,6 +261,72 @@ app.post('/comprimir', upload.single('archivo'), async (req, res) => {
     res.status(500).json({ error: 'Error del servidor' });
   }
 
+});
+
+
+// ===============================
+// UNIR PDFs
+// ===============================
+
+app.post('/unir', (req, res) => {
+  uploadMultiple(req, res, async (err) => {
+    let uploadedPaths = [];
+
+    try {
+      if (err) {
+        console.log('ERROR MULTER:', err.message);
+        return res.status(400).json({ error: 'Error al subir archivos' });
+      }
+
+      if (!req.files || req.files.length < 2) {
+        return res.status(400).json({ error: 'Se necesitan al menos 2 archivos PDF' });
+      }
+
+      uploadedPaths = req.files.map((f) => f.path);
+
+      for (const file of req.files) {
+        if (path.extname(file.originalname).toLowerCase() !== '.pdf') {
+          uploadedPaths.forEach((p) => { if (fs.existsSync(p)) fs.unlinkSync(p); });
+          return res.status(400).json({ error: 'Solo se permiten archivos PDF' });
+        }
+      }
+
+      const { PDFDocument } = require('pdf-lib');
+      const mergedPdf = await PDFDocument.create();
+
+      for (const filePath of uploadedPaths) {
+        const bytes = fs.readFileSync(filePath);
+        const pdf = await PDFDocument.load(bytes);
+        const pageIndices = pdf.getPageIndices();
+        const pages = await mergedPdf.copyPages(pdf, pageIndices);
+        pages.forEach((page) => mergedPdf.addPage(page));
+      }
+
+      uploadedPaths.forEach((p) => { if (fs.existsSync(p)) fs.unlinkSync(p); });
+      uploadedPaths = [];
+
+      const nombreTemp = `unido_${Date.now()}.pdf`;
+      const tempPdfPath = path.join(__dirname, 'temp', nombreTemp);
+      const mergedBytes = await mergedPdf.save();
+      fs.writeFileSync(tempPdfPath, mergedBytes);
+
+      setTimeout(() => {
+        if (fs.existsSync(tempPdfPath)) {
+          fs.unlinkSync(tempPdfPath);
+          console.log('PDF unido temporal eliminado:', nombreTemp);
+        }
+      }, 60000);
+
+      const tamanio = fs.statSync(tempPdfPath).size;
+      console.log(`Unión exitosa: ${req.files.length} PDFs → ${nombreTemp}`);
+
+      return res.json({ nombre: nombreTemp, tamanio, cantidad: req.files.length });
+    } catch (error) {
+      console.log('ERROR UNIR PDF:', error);
+      uploadedPaths.forEach((p) => { if (fs.existsSync(p)) fs.unlinkSync(p); });
+      return res.status(500).json({ error: 'Error al unir los PDFs' });
+    }
+  });
 });
 
 

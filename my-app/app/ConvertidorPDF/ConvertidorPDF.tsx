@@ -6,7 +6,7 @@ import * as Sharing from 'expo-sharing';
 import NadvarIndex from '@/components/NadvarIndex/NadvarIndex';
 import { comprimidorStyles } from '@/styles/ComprimirPDF';
 
-const getBackendHost = () => '192.168.100.64';
+const getBackendHost = () => '192.168.70.122';
 
 const formatMB = (bytes: number) => {
   if (!bytes || !Number.isFinite(bytes)) return '— MB';
