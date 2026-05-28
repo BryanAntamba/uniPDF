@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, View, Text, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -127,7 +128,7 @@ export default function ComprimidorPDF() {
     <ScrollView style={comprimidorStyles.container} contentContainerStyle={comprimidorStyles.scrollContainer}>
       <NadvarIndex />
       <View style={comprimidorStyles.content}>
-        <Image source={{ uri: 'https://cdn-icons-png.flaticon.com/512/337/337946.png' }} style={comprimidorStyles.logo} />
+        <MaterialIcons name="compress" size={80} color="#10b981" style={{ marginBottom: 20 }} />
         <Text style={comprimidorStyles.title}>PDF Compressor</Text>
         <Text style={comprimidorStyles.subtitle}>Reduce el tamaño de tus PDFs sin perder calidad</Text>
 

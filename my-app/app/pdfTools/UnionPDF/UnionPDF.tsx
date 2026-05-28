@@ -18,7 +18,7 @@ import {
 
 } from 'react-native';
 
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import * as DocumentPicker from 'expo-document-picker';
 
@@ -504,6 +504,22 @@ export default function UnionPDF() {
 
 
 
+  const reiniciarUnion = () => {
+
+    setPdfFiles([]);
+
+    setPhase('idle');
+
+    setMergedPdfUri(null);
+
+    setProgress(0);
+
+    clearProgressTimer();
+
+  };
+
+
+
   return (
 
     <ScrollView
@@ -524,13 +540,7 @@ export default function UnionPDF() {
 
           <>
 
-            <Image
-
-              source={{ uri: 'https://cdn-icons-png.flaticon.com/512/337/337954.png' }}
-
-              style={comprimidorStyles.logo}
-
-            />
+            <MaterialCommunityIcons name="file-multiple" size={80} color="#3b82f6" style={{ marginBottom: 20 }} />
 
             <Text style={comprimidorStyles.title}>Unir PDF</Text>
 
@@ -770,9 +780,15 @@ export default function UnionPDF() {
 
             <TouchableOpacity
 
-              style={[comprimidorStyles.button, unionStyles.mergeButton]}
+              style={[
+                comprimidorStyles.button,
+                unionStyles.mergeButton,
+                pdfFiles.length < 2 && { backgroundColor: '#cbd5e1', opacity: 0.6 }
+              ]}
 
               onPress={unirPDFs}
+
+              disabled={pdfFiles.length < 2}
 
             >
 
@@ -810,12 +826,39 @@ export default function UnionPDF() {
 
           <View style={unionStyles.resultSection}>
 
-            <Text style={unionStyles.resultTitle}>Los PDFs están unidos</Text>
+            <View
+              style={{
+                width: 140,
+                height: 140,
+                borderRadius: 70,
+                backgroundColor: '#10b98115',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 20,
+              }}
+            >
+              <MaterialCommunityIcons name="check-circle" size={80} color="#10b981" />
+            </View>
+
+            <Text style={unionStyles.resultTitle}>¡Los PDFs están unidos!</Text>
+
+            <Text style={{ fontSize: 14, color: '#666', textAlign: 'center', marginTop: 8, marginBottom: 24, paddingHorizontal: 16 }}>
+              Tus documentos han sido combinados en un único archivo de forma rápida y segura.
+            </Text>
 
             <TouchableOpacity style={comprimidorStyles.button} onPress={descargarPDFUnido}>
 
               <Text style={comprimidorStyles.buttonText}>Descargar el PDF unido</Text>
 
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[comprimidorStyles.button, { backgroundColor: '#f3f4f6', marginTop: 12 }]}
+              onPress={reiniciarUnion}
+            >
+              <Text style={[comprimidorStyles.buttonText, { color: '#111' }]}>
+                Unir otros PDFs
+              </Text>
             </TouchableOpacity>
 
           </View>

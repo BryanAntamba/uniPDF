@@ -50,7 +50,19 @@ export default function ConvertidorPDF() {
   const seleccionarArchivo = async () => {
     try {
       const r = await DocumentPicker.getDocumentAsync({
-        type: '*/*', // Aceptar cualquier tipo de archivo
+        type: [
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.ms-excel',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-powerpoint',
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          'text/plain',
+          'application/rtf',
+          'application/vnd.oasis.opendocument.text',
+          'image/*',
+          'application/x-ipynb+json'
+        ], // Bloquea archivos PDF a nivel de selector nativo del sistema
         copyToCacheDirectory: true,
       });
 
@@ -61,7 +73,16 @@ export default function ConvertidorPDF() {
 
       const asset = r.assets[0];
       const ext = asset.name.substring(asset.name.lastIndexOf('.')).toLowerCase();
-      
+
+      // Bloquear archivos PDF explícitamente
+      if (ext === '.pdf') {
+        Alert.alert(
+          'Archivo no permitido',
+          'No puedes seleccionar un archivo PDF porque ya se encuentra en formato PDF. Por favor, selecciona otro tipo de archivo.'
+        );
+        return;
+      }
+
       // Validar extensión
       if (!EXTENSIONES_SOPORTADAS.includes(ext)) {
         Alert.alert(
@@ -104,11 +125,11 @@ export default function ConvertidorPDF() {
       }, 200);
 
       const formData = new FormData();
-      
+
       // Determinar el tipo MIME del archivo
       const ext = archivo.name.substring(archivo.name.lastIndexOf('.')).toLowerCase();
       let mimeType = 'application/octet-stream';
-      
+
       if (['.jpg', '.jpeg'].includes(ext)) mimeType = 'image/jpeg';
       else if (ext === '.png') mimeType = 'image/png';
       else if (ext === '.gif') mimeType = 'image/gif';
@@ -150,11 +171,20 @@ export default function ConvertidorPDF() {
       const data = await response.json();
 
       const urlPDF = buildApiUrl(`/temp/${data.nombre}`);
-      const pdfUri = FileSystem.documentDirectory + 'archivo_convertido.pdf';
+      
+      // Obtener el nombre base del archivo seleccionado y asignarlo con la extensión .pdf
+      const originalName = archivo.name;
+      const lastDotIndex = originalName.lastIndexOf('.');
+      const baseName = lastDotIndex !== -1 ? originalName.substring(0, lastDotIndex) : originalName;
+      
+      // Limpiar caracteres especiales de la URI pero conservar letras, números, espacios y guiones
+      const cleanBaseName = baseName.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_\-]/g, '').trim();
+      const pdfUri = `${FileSystem.documentDirectory}${cleanBaseName}.pdf`;
+      
       await FileSystem.downloadAsync(urlPDF, pdfUri);
 
       const tamanio = data.tamanio || (await getFileSize(pdfUri));
-      
+
       setProgress(100);
       setTimeout(() => {
         setResultado({ pdfUri, tamanio });
@@ -164,7 +194,7 @@ export default function ConvertidorPDF() {
       console.log('ERROR GENERAL:', error);
       clearProgressTimer();
       setProgress(0);
-      
+
       if (error?.name === 'AbortError') {
         Alert.alert('Error', 'La conversión tardó demasiado. Intenta de nuevo.');
       } else {
@@ -191,11 +221,15 @@ export default function ConvertidorPDF() {
     <ScrollView style={comprimidorStyles.container} contentContainerStyle={comprimidorStyles.scrollContainer}>
       <NadvarIndex />
       <View style={comprimidorStyles.content}>
-        <MaterialCommunityIcons name="file-pdf-box" size={80} color="#ff4a36" />
-        <Text style={comprimidorStyles.title}>Convertir a PDF</Text>
-        <Text style={comprimidorStyles.subtitle}>
-          Convierte documentos, imágenes y notebooks a PDF
-        </Text>
+        {!loading && !resultado && (
+          <>
+            <MaterialCommunityIcons name="file-pdf-box" size={80} color="#ff4a36" />
+            <Text style={comprimidorStyles.title}>Convertir a PDF</Text>
+            <Text style={comprimidorStyles.subtitle}>
+              Convierte documentos Word, Excel, PowerPoint, TXT, RTF, como imágenes JPG, PNG, BMP, GIF, TIFF, WebP y notebooks .ipynb a PDF de forma rápida y sencilla.
+            </Text>
+          </>
+        )}
 
         {/* Archivo seleccionado - Solo mostrar si no está cargando ni hay resultado */}
         {selectedFile && !loading && !resultado && (
@@ -263,27 +297,14 @@ export default function ConvertidorPDF() {
               Tu archivo ha sido convertido a PDF correctamente
             </Text>
 
-            <View style={{ width: '100%', backgroundColor: '#f7f7f7', borderRadius: 16, padding: 16, marginBottom: 16 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-                <Text style={{ color: '#666', fontSize: 14 }}>Archivo original:</Text>
-                <Text style={{ color: '#111', fontWeight: '700', fontSize: 14 }} numberOfLines={1}>
-                  {selectedFile?.name}
-                </Text>
-              </View>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ color: '#666', fontSize: 14 }}>Tamaño PDF:</Text>
-                <Text style={{ color: '#ff4a36', fontWeight: '700', fontSize: 14 }}>
-                  {formatMB(resultado.tamanio)}
-                </Text>
-              </View>
-            </View>
+            {/* Se ha removido el desglose de archivo original y tamaño de PDF para mantener la interfaz simplificada */}
 
             <TouchableOpacity style={comprimidorStyles.button} onPress={descargarPDF}>
               <Text style={comprimidorStyles.buttonText}>Descargar PDF</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={[comprimidorStyles.button, { backgroundColor: '#f3f4f6', marginTop: 12 }]} 
+            <TouchableOpacity
+              style={[comprimidorStyles.button, { backgroundColor: '#f3f4f6', marginTop: 12 }]}
               onPress={eliminarArchivo}
             >
               <Text style={[comprimidorStyles.buttonText, { color: '#111' }]}>
@@ -311,21 +332,7 @@ export default function ConvertidorPDF() {
           </TouchableOpacity>
         )}
 
-        {/* Formatos soportados */}
-        {!selectedFile && !loading && !resultado && (
-          <View style={{ marginTop: 24, width: '100%' }}>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#111', marginBottom: 12, textAlign: 'center' }}>
-              Formatos soportados:
-            </Text>
-            <View style={{ backgroundColor: '#f7f7f7', borderRadius: 12, padding: 16 }}>
-              <Text style={{ fontSize: 13, color: '#666', lineHeight: 20 }}>
-                <Text style={{ fontWeight: '700' }}>• Documentos:</Text> Word, Excel, PowerPoint, TXT, RTF{'\n'}
-                <Text style={{ fontWeight: '700' }}>• Imágenes:</Text> JPG, PNG, BMP, GIF, TIFF, WebP{'\n'}
-                <Text style={{ fontWeight: '700' }}>• Notebooks:</Text> Jupyter (.ipynb)
-              </Text>
-            </View>
-          </View>
-        )}
+        {/* Formatos soportados removidos para simplificar la interfaz, ya que ahora se muestran en el mensaje de bienvenida superior */}
       </View>
     </ScrollView>
   );
