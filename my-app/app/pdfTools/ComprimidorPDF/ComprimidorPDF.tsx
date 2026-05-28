@@ -4,7 +4,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import NadvarIndex from '@/components/NadvarIndex/NadvarIndex';
-import { comprimidorStyles } from '@/styles/ComprimirPDF';
+import { comprimidorStyles } from '@/styles/pdfTools/ComprimirPDF';
 
 const getBackendHost = () => '192.168.70.122';
 
