@@ -68,4 +68,11 @@ export const indexStyles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: '#f3f4f6',
   },
+  cardIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

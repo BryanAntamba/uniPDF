@@ -32,6 +32,8 @@ import { comprimidorStyles } from '@/styles/pdfTools/ComprimirPDF';
 
 import { unionStyles } from '@/styles/pdfTools/UnionPDF';
 
+import { buildApiUrl } from '@/constants/config';
+
 
 
 type PdfItem = {
@@ -49,10 +51,6 @@ type PdfItem = {
 
 
 type Phase = 'idle' | 'list' | 'merging' | 'done';
-
-
-
-const getBackendHost = () => '192.168.70.122';
 
 
 
@@ -408,7 +406,7 @@ export default function UnionPDF() {
 
 
 
-      const response = await fetch(`http://${getBackendHost()}:3000/unir`, {
+      const response = await fetch(buildApiUrl('/unir'), {
 
         method: 'POST',
 
@@ -438,7 +436,7 @@ export default function UnionPDF() {
 
       const data = await response.json();
 
-      const urlPDF = `http://${getBackendHost()}:3000/temp/${data.nombre}`;
+      const urlPDF = buildApiUrl(`/temp/${data.nombre}`);
 
       const pdfUri = FileSystem.documentDirectory + 'pdf_unido.pdf';
 

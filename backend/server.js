@@ -43,7 +43,7 @@ const uploadMultiple = multer({ storage }).array('archivos', 50);
 
 const EXTENSIONES_LIBREOFFICE = [
   '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-  '.txt', '.rtf', '.odt', '.jpg', '.jpeg', '.png', '.bmp', '.gif'
+  '.txt', '.rtf', '.odt', '.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff', '.tif', '.webp'
 ];
 
 const EXTENSIONES_NBCONVERT = ['.ipynb'];
@@ -128,9 +128,10 @@ app.post('/convertir', upload.single('archivo'), async (req, res) => {
           return res.status(500).json({ error: 'PDF no generado' });
         }
 
+        const tamanio = fs.statSync(tempPdfPath).size;
         console.log('Conversión exitosa con nbconvert');
         eliminarTemp();
-        return res.json({ nombre: nombreTemp });
+        return res.json({ nombre: nombreTemp, tamanio });
       });
 
       return;
@@ -161,9 +162,10 @@ app.post('/convertir', upload.single('archivo'), async (req, res) => {
     if (fs.existsSync(archivoPath)) fs.unlinkSync(archivoPath);
 
     fs.writeFileSync(tempPdfPath, pdfBuffer);
+    const tamanio = fs.statSync(tempPdfPath).size;
     eliminarTemp();
 
-    return res.json({ nombre: nombreTemp });
+    return res.json({ nombre: nombreTemp, tamanio });
 
   } catch (error) {
 

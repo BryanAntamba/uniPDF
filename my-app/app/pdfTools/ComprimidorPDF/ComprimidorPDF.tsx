@@ -5,8 +5,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import NadvarIndex from '@/components/NadvarIndex/NadvarIndex';
 import { comprimidorStyles } from '@/styles/pdfTools/ComprimirPDF';
-
-const getBackendHost = () => '192.168.70.122';
+import { buildApiUrl, getBackendURL } from '@/constants/config';
 
 const formatMB = (bytes: number) => {
   if (!bytes || !Number.isFinite(bytes)) return '— MB';
@@ -70,7 +69,7 @@ export default function ComprimidorPDF() {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 120000);
 
-      const response = await fetch(`http://${getBackendHost()}:3000/comprimir`, {
+      const response = await fetch(buildApiUrl('/comprimir'), {
         method: 'POST',
         body: formData,
         signal: controller.signal,
@@ -85,7 +84,7 @@ export default function ComprimidorPDF() {
 
       const data = await response.json();
 
-      const urlPDF = `http://${getBackendHost()}:3000/temp/${data.nombre}`;
+      const urlPDF = buildApiUrl(`/temp/${data.nombre}`);
       const pdfUri = FileSystem.documentDirectory + 'archivo_comprimido.pdf';
       await FileSystem.downloadAsync(urlPDF, pdfUri);
 
