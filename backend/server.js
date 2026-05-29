@@ -209,34 +209,74 @@ app.post('/comprimir', upload.single('archivo'), async (req, res) => {
     const nombreTemp = `${Date.now()}.pdf`;
     tempPdfPath = path.join(__dirname, 'temp', nombreTemp);
 
-    const comando = `gswin64c -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dBATCH -dQUIET -dColorImageResolution=72 -dGrayImageResolution=72 -dMonoImageResolution=72 -sOutputFile="${tempPdfPath}" "${archivoPath}"`;
+    const pesoOriginal = req.file.size;
+    const pesoOriginalMB = pesoOriginal / 1024 / 1024;
+
+    // Determinar configuración de compresión según el tamaño del archivo
+    let pdfSettings = '/screen'; // Máxima compresión por defecto
+    let imageResolution = 72;
+
+    if (pesoOriginalMB <= 2) {
+      // Para archivos pequeños (≤2MB), usar configuración más conservadora
+      pdfSettings = '/ebook'; // Mejor calidad que /screen
+      imageResolution = 150; // Mayor resolución
+      console.log('Archivo pequeño detectado, usando compresión conservadora');
+    } else if (pesoOriginalMB <= 5) {
+      // Para archivos medianos (2-5MB)
+      pdfSettings = '/ebook';
+      imageResolution = 100;
+    }
+
+    const comando = `gswin64c -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=${pdfSettings} -dNOPAUSE -dBATCH -dQUIET -dColorImageResolution=${imageResolution} -dGrayImageResolution=${imageResolution} -dMonoImageResolution=${imageResolution} -sOutputFile="${tempPdfPath}" "${archivoPath}"`;
 
     console.log('Iniciando compresión con Ghostscript...');
+    console.log(`Tamaño original: ${pesoOriginalMB.toFixed(2)} MB`);
+    console.log(`Configuración: ${pdfSettings}, Resolución: ${imageResolution}dpi`);
 
     exec(comando, { timeout: 110000 }, (err, stdout, stderr) => {
-
-      if (fs.existsSync(archivoPath)) fs.unlinkSync(archivoPath);
 
       if (err) {
         console.log('ERROR GHOSTSCRIPT:', err.message);
         console.log('STDERR:', stderr);
+        if (fs.existsSync(archivoPath)) fs.unlinkSync(archivoPath);
         if (fs.existsSync(tempPdfPath)) fs.unlinkSync(tempPdfPath);
         return res.status(500).json({ error: 'Error al comprimir el PDF' });
       }
 
       if (!fs.existsSync(tempPdfPath)) {
+        if (fs.existsSync(archivoPath)) fs.unlinkSync(archivoPath);
         return res.status(500).json({ error: 'PDF comprimido no generado' });
       }
 
-      const pesoOriginal = req.file.size;
       const tamanioComprimido = fs.statSync(tempPdfPath).size;
+      
+      // Si el archivo comprimido es más grande que el original, usar el original
+      let tamanioFinal = tamanioComprimido;
+      let usandoOriginal = false;
+      
+      if (tamanioComprimido >= pesoOriginal) {
+        console.log('⚠️ Compresión aumentó el tamaño, usando archivo original');
+        // Copiar el archivo original al temp antes de eliminarlo
+        if (fs.existsSync(archivoPath)) {
+          fs.copyFileSync(archivoPath, tempPdfPath);
+          tamanioFinal = pesoOriginal;
+          usandoOriginal = true;
+        }
+      }
+      
+      // Eliminar archivo original después de todo el procesamiento
+      if (fs.existsSync(archivoPath)) fs.unlinkSync(archivoPath);
+      
       const porcentaje = pesoOriginal > 0
-        ? Math.max(0, Math.round(((pesoOriginal - tamanioComprimido) / pesoOriginal) * 100))
+        ? Math.max(0, Math.round(((pesoOriginal - tamanioFinal) / pesoOriginal) * 100))
         : 0;
 
       console.log('Compresión exitosa');
-      console.log(`Original: ${(pesoOriginal / 1024 / 1024).toFixed(2)} MB → Comprimido: ${(tamanioComprimido / 1024 / 1024).toFixed(2)} MB (${porcentaje}%)`);
-
+      if (usandoOriginal) {
+        console.log(`Original: ${(pesoOriginal / 1024 / 1024).toFixed(2)} MB → Sin cambios (compresión aumentaría el tamaño a ${(tamanioComprimido / 1024 / 1024).toFixed(2)} MB)`);
+      } else {
+        console.log(`Original: ${(pesoOriginal / 1024 / 1024).toFixed(2)} MB → Comprimido: ${(tamanioFinal / 1024 / 1024).toFixed(2)} MB (${porcentaje}%)`);
+      }
       setTimeout(() => {
         if (fs.existsSync(tempPdfPath)) {
           fs.unlinkSync(tempPdfPath);
@@ -246,9 +286,9 @@ app.post('/comprimir', upload.single('archivo'), async (req, res) => {
 
       return res.json({
         nombre: nombreTemp,
-        tamanio: tamanioComprimido,
+        tamanio: tamanioFinal,
         tamanioOriginal: pesoOriginal,
-        tamanioComprimido,
+        tamanioComprimido: tamanioFinal,
         porcentaje,
       });
     });
