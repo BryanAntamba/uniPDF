@@ -12,7 +12,7 @@ import { FontAwesome, MaterialIcons, MaterialCommunityIcons } from '@expo/vector
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import NadvarIndex from '@/components/NadvarIndex/NadvarIndex';
+import NadvarIndex from '@/components/NavbarUsuario/NavbarUsuario';
 import { comprimidorStyles } from '@/styles/pdfTools/ComprimirPDF';
 import { unionStyles } from '@/styles/pdfTools/UnionPDF';
 import { buildApiUrl } from '@/constants/config';
@@ -349,7 +349,7 @@ export default function RotarPDF() {
         {/* Fase inicial */}
         {phase === 'idle' && !hasFiles && (
           <>
-            <MaterialCommunityIcons name="rotate-right" size={80} color="#ec4899" />
+            <MaterialCommunityIcons name="rotate-right" size={80} color="#ff4a36" />
             <Text style={comprimidorStyles.title}>Rotar PDF</Text>
             <Text style={comprimidorStyles.subtitle}>
               Rota las páginas de tus archivos PDF en el ángulo que necesites de forma rápida y sencilla
@@ -388,7 +388,7 @@ export default function RotarPDF() {
                           seleccionarPDFs(true);
                         }}
                       >
-                        <MaterialIcons name="picture-as-pdf" size={20} color="#ec4899" />
+                        <MaterialIcons name="picture-as-pdf" size={20} color="#ff4a36" />
                         <Text style={unionStyles.menuItemText}>Agregar PDF</Text>
                       </Pressable>
                       <View style={unionStyles.menuDivider} />
@@ -429,7 +429,7 @@ export default function RotarPDF() {
                     unionStyles.fileRow,
                     isDragging && unionStyles.fileRowDragging,
                     isDropTarget && unionStyles.fileRowDropTarget,
-                    isSelected && { borderColor: '#ec4899', borderWidth: 2 },
+                    isSelected && { borderColor: '#ff4a36', borderWidth: 2 },
                   ]}
                 >
                   <View style={unionStyles.orderBadge}>
@@ -499,7 +499,7 @@ export default function RotarPDF() {
                     transform: [{ rotate: `${selectedFile.rotacion}deg` }],
                   }}
                 >
-                  <MaterialIcons name="picture-as-pdf" size={80} color="#ec4899" />
+                  <MaterialIcons name="picture-as-pdf" size={80} color="#ff4a36" />
                   <Text style={{ fontSize: 14, color: '#666', marginTop: 8 }}>
                     Rotación: {selectedFile.rotacion}°
                   </Text>
@@ -515,7 +515,7 @@ export default function RotarPDF() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       paddingVertical: 12,
-                      backgroundColor: '#ec4899',
+                      backgroundColor: '#ff4a36',
                       borderRadius: 12,
                       gap: 8,
                     }}
@@ -534,7 +534,7 @@ export default function RotarPDF() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       paddingVertical: 12,
-                      backgroundColor: '#ec4899',
+                      backgroundColor: '#ff4a36',
                       borderRadius: 12,
                       gap: 8,
                     }}
@@ -568,13 +568,13 @@ export default function RotarPDF() {
                 height: 140,
                 borderRadius: 70,
                 borderWidth: 8,
-                borderColor: '#ec4899',
+                borderColor: '#ff4a36',
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginBottom: 20,
               }}
             >
-              <Text style={{ fontSize: 36, fontWeight: 'bold', color: '#ec4899' }}>
+              <Text style={{ fontSize: 36, fontWeight: 'bold', color: '#ff4a36' }}>
                 {progress}%
               </Text>
               <Text style={{ fontSize: 12, color: '#666' }}>rotando</Text>
@@ -631,3 +631,4 @@ export default function RotarPDF() {
     </ScrollView>
   );
 }
+

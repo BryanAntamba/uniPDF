@@ -4,7 +4,7 @@ import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import NadvarIndex from '@/components/NadvarIndex/NadvarIndex';
+import NadvarIndex from '@/components/NavbarUsuario/NavbarUsuario';
 import { comprimidorStyles } from '@/styles/pdfTools/ComprimirPDF';
 import { buildApiUrl } from '@/constants/config';
 

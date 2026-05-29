@@ -11,7 +11,7 @@ import { FontAwesome, MaterialIcons, MaterialCommunityIcons } from '@expo/vector
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import NadvarIndex from '@/components/NadvarIndex/NadvarIndex';
+import NadvarIndex from '@/components/NavbarUsuario/NavbarUsuario';
 import { comprimidorStyles } from '@/styles/pdfTools/ComprimirPDF';
 import { unionStyles } from '@/styles/pdfTools/UnionPDF';
 import { buildApiUrl } from '@/constants/config';

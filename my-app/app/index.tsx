@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import NadvarIndex from '@/components/NadvarIndex/NadvarIndex';
+import NadvarIndex from '@/components/NavbarUsuario/NavbarUsuario';
 import { indexStyles } from '@/styles/Index';
 
 type AppRoute = 

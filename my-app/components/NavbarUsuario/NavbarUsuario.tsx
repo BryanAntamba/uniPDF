@@ -2,22 +2,24 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { navStyles } from '@/styles/NadvarIndex';
+import { navStyles } from '@/styles/navbarUsuario/NavbarUsuario';
 
 type NavbarRoute =
   | '/'
-  | '/ConvertidorPDF/ConvertidorPDF'
-  | '/UnionPDF/UnionPDF'
-  | '/FirmarPDF/FirmaPDF'
-  | '/ComprimidorPDF/ComprimidorPDF'
+  | '/pdfTools/ConvertidorPDF/ConvertidorPDF'
+  | '/pdfTools/UnionPDF/UnionPDF'
+  | '/pdfTools/FirmarPDF/FirmaPDF'
+  | '/pdfTools/ComprimidorPDF/ComprimidorPDF'
+  | '/pdfTools/RotarPDF/RotarPDF'
   | '/(auth)/Login';
 
 const menuItems: Array<{ label: string; route: NavbarRoute }> = [
   { label: 'Inicio', route: '/' },
-  { label: 'Convertir PDF', route: '/ConvertidorPDF/ConvertidorPDF' },
-  { label: 'Unir PDF', route: '/UnionPDF/UnionPDF' },
-  { label: 'Firmar PDF', route: '/FirmarPDF/FirmaPDF' },
-  { label: 'Comprimir PDF', route: '/ComprimidorPDF/ComprimidorPDF' },
+  { label: 'Convertir PDF', route: '/pdfTools/ConvertidorPDF/ConvertidorPDF' },
+  { label: 'Unir PDF', route: '/pdfTools/UnionPDF/UnionPDF' },
+  { label: 'Firmar PDF', route: '/pdfTools/FirmarPDF/FirmaPDF' },
+  { label: 'Comprimir PDF', route: '/pdfTools/ComprimidorPDF/ComprimidorPDF' },
+  { label: 'Rotar PDF', route: '/pdfTools/RotarPDF/RotarPDF' },
   { label: 'Iniciar Sesion', route: '/(auth)/Login' },
 ];
 
